@@ -6,6 +6,7 @@
 *.lo
 *.o
 *.obj
+!src/bpx_driver/bpx/meshes/*.obj
 
 # Precompiled Headers
 *.gch
@@ -22,6 +23,7 @@
 *.dylib
 *.dll
 *.so.*
+!src/bpx_driver/third_party/bpx_sdk/lib/*.so
 
 
 # Fortran module files
@@ -57,6 +59,8 @@ compile_commands.json
 *.log
 *.bak
 *.swp
+__pycache__/
+*.py[cod]
 
 # vcpkg
 vcpkg_installed/

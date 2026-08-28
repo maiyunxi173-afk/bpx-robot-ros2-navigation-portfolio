@@ -1,0 +1,17 @@
+flowchart LR
+    BPX[BPX quadruped SDK] --> Driver[bpx_driver]
+    Driver --> Cmd[/cmd_vel control/]
+    Driver --> IMU[/imu/data/]
+    Driver --> LegOdom[/odom leg/body odometry/]
+    Driver --> State[/bpx status and services/]
+    IMU --> EKF[bpx_ekf_bringup robot_localization EKF]
+    LegOdom --> EKF
+    EKF --> Fused[/odom/filtered + odom->base_link/]
+    Lidar[sllidar_ros2 /scan] --> SLAM[slam_toolbox_nav2 or cartographer_nav2]
+    Lidar --> RF2O[rf2o_laser_odometry fallback]
+    RF2O --> Fallback[/odom fallback/]
+    Fused --> SLAM
+    Fallback --> SLAM
+    SLAM --> Map[map + map->odom]
+    Map --> Nav2[Nav2 planner/controller/recoveries]
+    Nav2 --> Cmd
