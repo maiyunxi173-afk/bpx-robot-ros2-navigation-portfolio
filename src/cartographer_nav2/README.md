@@ -1,56 +1,57 @@
-# cartographer_nav2
+# Cartographer + Nav2 for BPX
 
-BPX 机器狗的 `Cartographer + Nav2` 方案。
+This package integrates Cartographer mapping/pure localisation with Nav2 on the BPX quadruped.
 
-## 功能
+## Modes
 
-- `mode:=mapping`：启动 BPX 驱动、RPLIDAR、Cartographer 建图和 occupancy grid。
-- `mode:=localization`：加载 `.pbstream`，使用 Cartographer 纯定位。
-- `mode:=nav`：加载 `.pbstream` 做定位，同时启动 Nav2 执行导航。
-- `odom_source:=bpx`：默认使用 `bpx_driver` 发布的 `/odom` 与 `odom -> base_link`。
-- `odom_source:=rf2o`：使用 `rf2o_laser_odometry` 根据 `/scan` 发布 `/odom` 与 `odom -> base_link`。
+| Mode | Required map input | Result |
+| --- | --- | --- |
+| `mapping` | None | Builds a Cartographer trajectory and occupancy grid. |
+| `localization` | `.pbstream` | Runs Cartographer in pure-localisation mode. |
+| `nav` | `.pbstream` plus `.yaml/.pgm` | Localises with Cartographer and runs Nav2. |
 
-## 启动
+All modes accept `odom_source:=bpx|ekf|rf2o`.
 
-建图：
-
-```bash
-ros2 launch cartographer_nav2 bringup.launch.py mode:=mapping
-```
-
-纯定位：
+## Build
 
 ```bash
-ros2 launch cartographer_nav2 bringup.launch.py mode:=localization \
-  pbstream:=/path/to/map.pbstream
+source /opt/ros/humble/setup.bash
+colcon build --symlink-install --packages-select \
+  bpx_driver bpx_ekf_bringup sllidar_ros2 \
+  rf2o_laser_odometry cartographer_nav2
+source install/setup.bash
 ```
 
-导航：
+## Mapping
 
 ```bash
-ros2 launch cartographer_nav2 bringup.launch.py mode:=nav \
-  pbstream:=/path/to/map.pbstream \
-  map:=/path/to/map.yaml
+ros2 launch cartographer_nav2 bringup.launch.py \
+  mode:=mapping odom_source:=ekf
 ```
 
-改用 rf2o 里程计：
+## Pure localisation
 
 ```bash
-ros2 launch cartographer_nav2 bringup.launch.py mode:=nav odom_source:=rf2o
+ros2 launch cartographer_nav2 bringup.launch.py \
+  mode:=localization \
+  pbstream:=src/cartographer_nav2/maps/map5291.pbstream \
+  odom_source:=ekf
 ```
 
-## 地图格式
+## Localisation and navigation
 
-- Cartographer 定位需要 `.pbstream`。
-- Nav2 代价地图和全局规划使用 `.yaml + .pgm`。
-- 当前默认使用 `maps/map5291.pbstream` 和 `maps/map5291.yaml`。
-
-## TF
-
-```text
-map -> odom -> base_link -> laser
+```bash
+ros2 launch cartographer_nav2 bringup.launch.py \
+  mode:=nav \
+  pbstream:=src/cartographer_nav2/maps/map5291.pbstream \
+  map:=src/cartographer_nav2/maps/map5291.yaml \
+  odom_source:=ekf
 ```
 
-- Cartographer 发布 `map -> odom`。
-- `odom_source:=bpx` 时，`bpx_driver` 发布 `odom -> base_link`。
-- `odom_source:=rf2o` 时，`rf2o_laser_odometry` 发布 `odom -> base_link`。
+## Frame ownership
+
+Cartographer publishes `map -> odom`. Exactly one selected odometry backend publishes `odom -> base_link`; the launch conditions prevent the BPX driver, EKF and RF2O from publishing that transform simultaneously.
+
+## Evidence and limitations
+
+Several `.pbstream` and occupancy-map snapshots are included as development artefacts. They are not a benchmark set. LiDAR mounting transforms differ between some historical launch configurations and must be measured on the target robot before comparing mapping quality. See [evaluation protocol](../../docs/evaluation.md) for the metrics required before making quantitative claims.

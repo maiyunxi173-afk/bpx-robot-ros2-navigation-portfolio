@@ -1,0 +1,13 @@
+name: Portfolio validation
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate public portfolio
+        run: python3 scripts/validate_portfolio.py

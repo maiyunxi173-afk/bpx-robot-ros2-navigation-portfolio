@@ -17,6 +17,13 @@ This repository isolates my ROS 2 navigation contribution from a collaborative r
 | What can be compared? | Direct BPX leg/body odometry, `robot_localization` EKF fusion, and RF2O scan-matching odometry; SLAM Toolbox and Cartographer mapping/localisation routes. |
 | What evidence is included? | Source code, launch/configuration files, saved maps, run instructions, architecture documentation, and a separately labelled learning-navigation simulation demo. |
 
+### Reviewer shortcuts
+
+- Admissions/programming review: [one-page programming statement](docs/programming_statement.md)
+- Technical evidence review: [claims, failures and evaluation protocol](docs/evaluation.md)
+- Reproduction: [build and experiment runbook](docs/runbook.md)
+- Public-release due diligence: [privacy and release review](docs/security_and_release.md)
+
 ## Demo
 
 [![Watch the edited autonomous-navigation demo](assets/demo/demo_cover.jpg)](assets/demo/autonomous_navigation_portfolio_demo.mp4)
@@ -77,6 +84,9 @@ The launch files enforce one owner for `odom -> base_link`, avoiding the duplica
 ├── docs/
 │   ├── project_showcase.md      # extended technical narrative
 │   ├── runbook.md               # build, launch and validation commands
+│   ├── programming_statement.md # programming evidence for admissions review
+│   ├── evaluation.md            # evidence matrix, failures and benchmark plan
+│   ├── security_and_release.md  # privacy, licensing and release checklist
 │   ├── demo_notes.md            # video timeline and evidence boundary
 │   └── source_attribution.md    # collaboration and third-party attribution
 └── scripts/build_portfolio_demo.sh
@@ -92,6 +102,8 @@ sudo apt install \
   ros-humble-slam-toolbox ros-humble-robot-localization \
   ros-humble-cartographer-ros
 
+source /opt/ros/humble/setup.bash
+rosdep install --from-paths src --ignore-src -r -y
 colcon build --symlink-install
 source install/setup.bash
 ```
@@ -121,6 +133,14 @@ ros2 launch slam_toolbox_nav2 bringup.launch.py \
 
 For Cartographer, RF2O fallback, frame checks and map saving, follow the [runbook](docs/runbook.md).
 
+Create a clean, tested source archive for an application portal without `.git`, build artefacts or logs:
+
+```bash
+bash scripts/package_source.sh /path/to/output
+```
+
+The script also writes a SHA-256 checksum beside the ZIP archive.
+
 ## Design decisions
 
 | Decision | Rationale |
@@ -145,8 +165,11 @@ The navigation workspace was extracted and reorganised from the collaborative [H
 ## Documentation
 
 - [Technical project showcase](docs/project_showcase.md)
+- [Programming statement](docs/programming_statement.md)
+- [Evidence, failure cases and evaluation protocol](docs/evaluation.md)
 - [Build and experiment runbook](docs/runbook.md)
 - [Demo notes and timecodes](docs/demo_notes.md)
+- [Public-release and privacy review](docs/security_and_release.md)
 - [Source and third-party attribution](docs/source_attribution.md)
 
 ## Contact

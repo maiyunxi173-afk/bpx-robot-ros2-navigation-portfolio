@@ -1,8 +1,8 @@
-# BPX ROS2 Navigation Portfolio
+# BPX ROS 2 Navigation Portfolio
 
 ## Project Positioning
 
-This repository extracts and reorganizes my ROS2 navigation contribution from the collaborative HRS Web Console project into a standalone, reviewable portfolio. The focus is the BPX quadruped navigation stack: robot driver integration, odometry output, EKF localization bringup, LiDAR SLAM mapping, and Nav2 navigation on a real robot.
+This repository extracts and reorganizes my ROS 2 navigation contribution from the collaborative HRS Web Console project into a standalone, reviewable portfolio. The focus is the BPX quadruped navigation stack: robot driver integration, odometry output, EKF localisation bring-up, LiDAR SLAM mapping, and Nav2 navigation on a physical platform.
 
 ## My Contribution
 
@@ -61,8 +61,20 @@ flowchart LR
 
 ### SLAM and Navigation
 
-`slam_toolbox_nav2` supports online mapping and map-based navigation. `cartographer_nav2` supports Cartographer mapping, pure localization from `.pbstream`, and Nav2 navigation with occupancy-grid maps. Both stacks accept `odom_source:=bpx` or `odom_source:=rf2o`, which made real-robot testing easier when leg/body odometry quality varied.
+`slam_toolbox_nav2` supports online mapping and map-based navigation. `cartographer_nav2` supports Cartographer mapping, pure localisation from `.pbstream`, and Nav2 navigation with occupancy-grid maps. Both stacks accept `odom_source:=bpx|ekf|rf2o`, making the odometry path explicit and preventing competing TF publishers.
+
+## Failure-driven integration
+
+The main engineering value came from resolving interface failures rather than presenting a frictionless final demo. Frozen leg-odometry fields required an explicit fallback path; stale velocity commands required a timeout; motion commands had to be gated by the platform's stand state; and the driver, EKF and scan odometry could not all own `odom -> base_link`. LiDAR extrinsic differences between historical configurations also remain a calibration task before fair quantitative comparison.
+
+These cases, their mitigations and their remaining limits are recorded in [the evidence and evaluation document](evaluation.md).
+
+## Results boundary
+
+The repository includes implementation, configuration, maps and simulation video evidence. It does not include a ground-truth BPX trajectory dataset, fixed-route navigation trials or a policy-deployment result. Therefore, it makes no numerical claim for BPX localisation error, navigation success rate or sim-to-real transfer. The proposed protocol for adding those results is documented rather than filling the gap with unsupported numbers.
 
 ## Evidence of Engineering Ownership
 
 This portfolio is intentionally organized around the navigation subsystem rather than the full web console. It separates platform-specific driver code, localization bringup, SLAM packages, maps, configuration, and documentation so reviewers can understand what I built, how it runs, and which integration decisions were made for a real BPX robot.
+
+For a concise admissions-oriented account of language proficiency and code evidence, see the [programming statement](programming_statement.md). For collaboration and third-party boundaries, see [source attribution](source_attribution.md).

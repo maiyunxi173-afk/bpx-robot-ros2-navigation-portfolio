@@ -1,6 +1,6 @@
 flowchart LR
     BPX[BPX quadruped SDK] --> Driver[bpx_driver]
-    Driver --> Cmd[/cmd_vel control/]
+    Cmd[/cmd_vel control/] --> Driver
     Driver --> IMU[/imu/data/]
     Driver --> LegOdom[/odom leg/body odometry/]
     Driver --> State[/bpx status and services/]

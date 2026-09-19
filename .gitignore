@@ -71,3 +71,17 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+# ROS 2 runtime and recorded data
+log/
+*.db3
+*.mcap
+
+# Local credentials and environment files
+.env
+.env.*
+*.pem
+*.key
+
+# Generated release archives
+dist/

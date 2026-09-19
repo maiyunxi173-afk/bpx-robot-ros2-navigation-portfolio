@@ -11,6 +11,8 @@
 
 ```bash
 cd bpx-robot-ros2-navigation-portfolio
+source /opt/ros/humble/setup.bash
+rosdep install --from-paths src --ignore-src -r -y
 colcon build --symlink-install
 source install/setup.bash
 ```
@@ -99,7 +101,7 @@ ros2 topic echo /odom --once
 ros2 topic echo /imu/data --once
 ros2 topic echo /scan --once
 ros2 run tf2_tools view_frames
-ros2 action list | grep navigate
+ros2 action list | rg navigate
 ```
 
 If the web console or another ROS process is attached, verify the same domain:
