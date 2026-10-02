@@ -8,7 +8,7 @@
 
 This repository isolates my ROS 2 navigation contribution from a collaborative robot-console project. It turns a BPX quadruped SDK into standard ROS interfaces, provides three selectable odometry paths, and connects the robot to SLAM Toolbox, Cartographer and Nav2. The emphasis is not a single algorithm demo, but the integration decisions that make localisation and navigation components work together on a physical platform.
 
-## 60-second overview
+## Review in 3 minutes
 
 | Question | Answer |
 | --- | --- |
@@ -23,6 +23,17 @@ This repository isolates my ROS 2 navigation contribution from a collaborative r
 - Technical evidence review: [claims, failures and evaluation protocol](docs/evaluation.md)
 - Reproduction: [build and experiment runbook](docs/runbook.md)
 - Public-release due diligence: [privacy and release review](docs/security_and_release.md)
+
+## Claim, evidence and limitation
+
+| Claim | Evidence | Limitation |
+| --- | --- | --- |
+| BPX interfaces and safety gates are implemented | Driver source, launch files, timeout and stand-state logic | Requires the BPX robot and vendor SDK for hardware verification |
+| Three odometry routes are selectable without competing TF owners | Conditional launch/configuration for BPX, EKF and RF2O | Comparative accuracy has not been measured against independent ground truth |
+| SLAM Toolbox, Cartographer and Nav2 are integrated | Packages, maps, parameters and runbook | No repeated fixed-route success-rate benchmark is included |
+| A learning-navigation workflow was demonstrated | Separately labelled Gazebo video | Simulation only; the policy is not claimed as deployed on BPX |
+
+Start with the [driver and launch tree](src/), then read the [runbook](docs/runbook.md), [evidence register](docs/evaluation.md), and [benchmark CSV template](docs/benchmark_template.csv). The quantitative thesis results reported elsewhere in my application are not BPX results.
 
 ## Demo
 

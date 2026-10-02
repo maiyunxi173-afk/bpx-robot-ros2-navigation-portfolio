@@ -1,0 +1,4 @@
+route_id,trial_id,odom_source,start_pose,goal_pose,success,duration_s,collision_count,safety_intervention_count,path_length_m,ground_truth_source,ate_rmse_m,rpe_rmse_m,software_commit,parameter_set,notes
+route_a,01,ekf,,,,,,,,,,,,,
+route_a,02,bpx,,,,,,,,,,,,,
+route_a,03,rf2o,,,,,,,,,,,,,
