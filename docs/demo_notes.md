@@ -1,8 +1,20 @@
 # Demo Notes
 
-## Edited video
+## BPX hardware-integration clip
 
-The application demo is available at [assets/demo/autonomous_navigation_portfolio_demo.mp4](../assets/demo/autonomous_navigation_portfolio_demo.mp4).
+The BPX hardware clip is available at [assets/demo/bpx_hardware_navigation_demo.mp4](../assets/demo/bpx_hardware_navigation_demo.mp4). It is a 21-second H.264 video derived from the supplied BPX recording for browser-compatible playback on GitHub.
+
+What the clip shows:
+
+- a BPX quadruped in the obstacle-course environment;
+- the corresponding live map and robot-console view; and
+- the physical setup used for the ROS 2 driver, localisation, SLAM and Nav2 integration workflow.
+
+The clip is evidence of **hardware integration and functional navigation workflow**. It does not contain a ground-truth trajectory, repeated fixed-route trials, collision statistics, or a controlled success-rate measurement. It must therefore not be used to claim numerical localisation accuracy, navigation success rate, or deployment of the Gazebo learning policy on BPX.
+
+## Gazebo learning-navigation video
+
+The separately labelled simulation video is available at [assets/demo/autonomous_navigation_portfolio_demo.mp4](../assets/demo/autonomous_navigation_portfolio_demo.mp4).
 
 Approximate timeline:
 
@@ -17,7 +29,7 @@ Approximate timeline:
 
 ## Scope
 
-This video supports a related learning-navigation experiment described in my application portfolio. It does **not** demonstrate deployment of the learned policy on the BPX quadruped. The physical-platform material in this repository is the ROS 2 driver/localisation/SLAM/Nav2 integration; the learning-navigation recording is included to show a complementary simulation workflow.
+This video supports a related learning-navigation experiment described in my application portfolio. It does **not** demonstrate deployment of the learned policy on the BPX quadruped. The physical-platform material in this repository is the ROS 2 driver/localisation/SLAM/Nav2 integration, now represented by the separate BPX hardware clip; the learning-navigation recording is included to show a complementary simulation workflow.
 
 The four raw screen recordings contain no audible content. The edited version removes the silent audio tracks, shortens inactive desktop sections, standardises the output to 1280×720 H.264, and adds English captions for an admissions audience.
 

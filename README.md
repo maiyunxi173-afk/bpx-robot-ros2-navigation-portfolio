@@ -15,7 +15,7 @@ This repository isolates my ROS 2 navigation contribution from a collaborative r
 | What did I build? | The BPX ROS 2 driver adaptation, odometry interfaces, EKF bring-up, SLAM/Nav2 launch integration and real-platform debugging workflow. |
 | What problem does it solve? | It gives a quadruped a consistent `map -> odom -> base_link` frame chain and standard `/scan`, `/odom`, `/imu/data` and `/cmd_vel` interfaces for mapping and navigation. |
 | What can be compared? | Direct BPX leg/body odometry, `robot_localization` EKF fusion, and RF2O scan-matching odometry; SLAM Toolbox and Cartographer mapping/localisation routes. |
-| What evidence is included? | Source code, launch/configuration files, saved maps, run instructions, architecture documentation, and a separately labelled learning-navigation simulation demo. |
+| What evidence is included? | Source code, launch/configuration files, saved maps, run instructions, architecture documentation, a labelled BPX hardware-integration clip, and a separately labelled learning-navigation simulation demo. |
 
 ### Reviewer shortcuts
 
@@ -31,17 +31,24 @@ This repository isolates my ROS 2 navigation contribution from a collaborative r
 | BPX interfaces and safety gates are implemented | Driver source, launch files, timeout and stand-state logic | Requires the BPX robot and vendor SDK for hardware verification |
 | Three odometry routes are selectable without competing TF owners | Conditional launch/configuration for BPX, EKF and RF2O | Comparative accuracy has not been measured against independent ground truth |
 | SLAM Toolbox, Cartographer and Nav2 are integrated | Packages, maps, parameters and runbook | No repeated fixed-route success-rate benchmark is included |
+| BPX hardware integration was recorded | Labelled BPX hardware clip with live map/console view | Functional integration evidence only; it is not a ground-truth accuracy or success-rate benchmark |
 | A learning-navigation workflow was demonstrated | Separately labelled Gazebo video | Simulation only; the policy is not claimed as deployed on BPX |
 
 Start with the [driver and launch tree](src/), then read the [runbook](docs/runbook.md), [evidence register](docs/evaluation.md), and [benchmark CSV template](docs/benchmark_template.csv). The quantitative thesis results reported elsewhere in my application are not BPX results.
 
-## Demo
+## Video evidence
 
-[![Watch the edited autonomous-navigation demo](assets/demo/demo_cover.jpg)](assets/demo/autonomous_navigation_portfolio_demo.mp4)
+### BPX hardware-integration clip — 21 seconds
 
-**[Watch/download the 78-second edited demo](assets/demo/autonomous_navigation_portfolio_demo.mp4)** · [Demo scope and timeline](docs/demo_notes.md)
+[![Watch the BPX hardware-integration clip](assets/demo/bpx_hardware_navigation_cover.jpg)](assets/demo/bpx_hardware_navigation_demo.mp4)
 
-The video is a **Gazebo learning-navigation experiment**, not footage of the BPX robot. It is included as related work on learned local navigation and is deliberately separated from the real-platform ROS 2 stack documented below. The repository currently contains the recorded experiment, not the training code; see [demo notes](docs/demo_notes.md) for the evidence boundary.
+**[Watch/download the BPX hardware-integration clip](assets/demo/bpx_hardware_navigation_demo.mp4)**. It shows the BPX quadruped in the obstacle-course environment alongside the live map and robot-console view. It is evidence of hardware integration and functional navigation workflow, **not** a quantitative localisation-accuracy, route-success-rate, or learned-policy-deployment claim.
+
+### Learning navigation in Gazebo — 78 seconds
+
+[![Watch the edited Gazebo learning-navigation demo](assets/demo/demo_cover.jpg)](assets/demo/autonomous_navigation_portfolio_demo.mp4)
+
+**[Watch/download the Gazebo learning-navigation demo](assets/demo/autonomous_navigation_portfolio_demo.mp4)**. This is a **simulation experiment**, not footage of the BPX robot. It is included as related work on learned local navigation and is deliberately separated from the physical-platform ROS 2 stack documented below. The repository currently contains the recorded experiment, not the training code; see [demo notes](docs/demo_notes.md) for the evidence boundary.
 
 ## System scope
 
@@ -90,7 +97,7 @@ The launch files enforce one owner for `odom -> base_link`, avoiding the duplica
 │   ├── rf2o_laser_odometry/     # third-party scan-matching fallback
 │   └── sllidar_ros2/            # third-party SLAMTEC LiDAR driver
 ├── assets/
-│   ├── demo/                    # edited application demo and cover image
+│   ├── demo/                    # BPX hardware and separately labelled Gazebo demos
 │   └── diagrams/
 ├── docs/
 │   ├── project_showcase.md      # extended technical narrative
@@ -167,6 +174,7 @@ The script also writes a SHA-256 checksum beside the ZIP archive.
 - Saved maps and launch/configuration artefacts are included; raw ROS bags and quantitative navigation benchmarks are not yet included.
 - The EKF in this repository is configured through the standard `robot_localization` package. A separate custom 15-state error-state estimator mentioned in my broader application materials is **not represented by code here** and is therefore not claimed as part of this repository.
 - BPX vendor SDK headers and binaries are retained under `src/bpx_driver/third_party/bpx_sdk`; redistribution and hardware compatibility should be checked against the vendor terms before reuse.
+- The 21-second BPX clip is functional hardware-integration evidence only; it does not establish a numerical localisation or navigation benchmark.
 - The edited learning-navigation video is simulation evidence only. No claim of real-robot deployment is made for that policy.
 
 ## Collaboration and attribution
