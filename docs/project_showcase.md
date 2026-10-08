@@ -71,7 +71,7 @@ These cases, their mitigations and their remaining limits are recorded in [the e
 
 ## Results boundary
 
-The repository includes implementation, configuration, maps and simulation video evidence. It does not include a ground-truth BPX trajectory dataset, fixed-route navigation trials or a policy-deployment result. Therefore, it makes no numerical claim for BPX localisation error, navigation success rate or sim-to-real transfer. The proposed protocol for adding those results is documented rather than filling the gap with unsupported numbers.
+The repository includes implementation, configuration, maps and a labelled BPX hardware-integration clip. It does not include a ground-truth BPX trajectory dataset or fixed-route navigation trials. Therefore, it makes no numerical claim for BPX localisation error or navigation success rate. The proposed protocol for adding those results is documented rather than filling the gap with unsupported numbers.
 
 ## Evidence of Engineering Ownership
 

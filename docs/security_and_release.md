@@ -5,7 +5,7 @@
 - ROS 2 source, launch files, configuration and saved map artefacts needed to review the navigation subsystem.
 - A public contact email already used by the repository maintainer metadata.
 - Private-network robot IP defaults used by the BPX SDK (`10.21.20.1`); these are not internet credentials.
-- The edited simulation demo with inactive desktop sections shortened.
+- A labelled BPX hardware-integration clip showing the robot, live map and console view.
 
 ## Excluded from the public portfolio
 

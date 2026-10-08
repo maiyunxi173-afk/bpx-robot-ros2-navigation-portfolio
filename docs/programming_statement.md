@@ -41,7 +41,7 @@ My undergraduate navigation work used Python/MATLAB to implement gait detection,
 
 ## Engineering habits
 
-- Keep simulation, physical-platform evidence and unverified claims explicitly separated.
+- Keep verified implementation evidence and unverified claims explicitly separated.
 - Prefer reproducible launch/configuration paths over undocumented terminal sequences.
 - Record frame ownership and timing assumptions because localisation failures are often interface failures.
 - Disable physical actuation when calibration or state validity is unresolved.

@@ -9,9 +9,8 @@
 | Three odometry modes are selectable | Conditional launch paths for `bpx`, `ekf` and `rf2o` | Code/config evidence |
 | TF ownership is separated by mode | `publish_odom_tf` settings and conditional node launch | Code/config evidence |
 | SLAM Toolbox and Cartographer routes are configured | Launch/configuration packages and saved map artefacts | Integration evidence |
-| A learning-navigation workflow was recorded in Gazebo | Edited video and raw-clip-derived timeline | Simulation video evidence only |
+| BPX hardware integration was recorded | Labelled BPX clip with live map and console view | Functional integration evidence only |
 | BPX navigation achieves a specific success rate or localisation error | No fixed-route bags or ground truth included | **Not established** |
-| The learning policy transfers to the BPX robot | No deployment evidence included | **Not established** |
 
 ## Quantitative results
 
@@ -41,5 +40,3 @@ Before adding performance claims, run the following protocol for each odometry m
 5. Use motion-capture, surveyed landmarks or another independent reference for trajectory error.
 6. Report absolute trajectory error, relative pose error, navigation success rate, collision/safety-intervention count, completion time and path-length ratio.
 7. Publish failed trials and parameter files alongside successful runs.
-
-For the learning-navigation experiment, additionally report training seed, evaluation seeds, checkpoint, environment version, success/collision definitions, episode count and a classical-controller baseline.
