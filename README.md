@@ -1,186 +1,114 @@
-# BPX Quadruped ROS 2 Navigation
+# BPX Quadruped ROS 2 Navigation Integration
 
-> A reviewable engineering portfolio for quadruped localisation, LiDAR SLAM and autonomous navigation.
+**MAI Yunxi** | ROS 2 Humble | BPX quadruped | LiDAR SLAM | Nav2 | Real-robot debugging
 
-[![ROS 2](https://img.shields.io/badge/ROS%202-Humble-22314E?logo=ros)](https://docs.ros.org/en/humble/)
-[![Platform](https://img.shields.io/badge/platform-BPX%20quadruped-0B7285)](#system-scope)
-[![License](https://img.shields.io/badge/license-mixed-informational)](docs/source_attribution.md)
+An engineering portfolio for turning a vendor quadruped SDK into standard ROS 2 navigation interfaces. The work focuses on command safety, TF ownership, selectable odometry, SLAM/Nav2 integration and evidence-bounded hardware debugging.
 
-This repository isolates my ROS 2 navigation contribution from a collaborative robot-console project. It turns a BPX quadruped SDK into standard ROS interfaces, provides three selectable odometry paths, and connects the robot to SLAM Toolbox, Cartographer and Nav2. The emphasis is not a single algorithm demo, but the integration decisions that make localisation and navigation components work together on a physical platform.
+[![BPX hardware-integration preview](docs/media/bpx_physical_preview.gif)](docs/media/bpx_physical_demo.mp4)
 
-## Review in 3 minutes
+**[Open/download the 21-second H.264 recording](docs/media/bpx_physical_demo.mp4)**.
 
-| Question | Answer |
-| --- | --- |
-| What did I build? | The BPX ROS 2 driver adaptation, odometry interfaces, EKF bring-up, SLAM/Nav2 launch integration and real-platform debugging workflow. |
-| What problem does it solve? | It gives a quadruped a consistent `map -> odom -> base_link` frame chain and standard `/scan`, `/odom`, `/imu/data` and `/cmd_vel` interfaces for mapping and navigation. |
-| What can be compared? | Direct BPX leg/body odometry, `robot_localization` EKF fusion, and RF2O scan-matching odometry; SLAM Toolbox and Cartographer mapping/localisation routes. |
-| What evidence is included? | Source code, launch/configuration files, saved maps, run instructions, architecture documentation, and a labelled BPX hardware-integration clip. |
+The recording shows a physical robot, map view and control console in one integration session. It is functional evidence, not an independent measurement of localisation accuracy, route success or collision-free autonomy.
 
-### Reviewer shortcuts
+## My Contribution
 
-- Admissions/programming review: [one-page programming statement](docs/programming_statement.md)
-- Technical evidence review: [claims, failures and evaluation protocol](docs/evaluation.md)
-- Reproduction: [build and experiment runbook](docs/runbook.md)
-- Public-release due diligence: [privacy and release review](docs/security_and_release.md)
+- Adapted the BPX SDK to ROS 2 topics, services and velocity control, including stand-state gating and stale-command timeout: [`bpx_driver_node.cpp`](src/bpx_driver/src/bpx_driver_node.cpp).
+- Implemented configurable BPX odometry and IMU publication, with explicit TF ownership controls: [driver configuration](src/bpx_driver/config/bpx_params.yaml) and [driver launch](src/bpx_driver/launch/bpx_driver.launch.py).
+- Added a standard `robot_localization` EKF route without representing it as a custom estimator: [EKF launch](src/bpx_ekf_bringup/launch/ekf_localization.launch.py) and [configuration](src/bpx_ekf_bringup/config/ekf.yaml).
+- Integrated `bpx`, `ekf` and `rf2o` odometry choices with SLAM Toolbox/Cartographer and Nav2: [SLAM Toolbox bring-up](src/slam_toolbox_nav2/launch/bringup.launch.py) and [Cartographer bring-up](src/cartographer_nav2/launch/bringup.launch.py).
+- Reorganised the navigation subsystem into a reviewable portfolio with source attribution, failure analysis and a reproducible benchmark plan.
 
-## Claim, evidence and limitation
-
-| Claim | Evidence | Limitation |
-| --- | --- | --- |
-| BPX interfaces and safety gates are implemented | Driver source, launch files, timeout and stand-state logic | Requires the BPX robot and vendor SDK for hardware verification |
-| Three odometry routes are selectable without competing TF owners | Conditional launch/configuration for BPX, EKF and RF2O | Comparative accuracy has not been measured against independent ground truth |
-| SLAM Toolbox, Cartographer and Nav2 are integrated | Packages, maps, parameters and runbook | No repeated fixed-route success-rate benchmark is included |
-| BPX hardware integration was recorded | Labelled BPX hardware clip with live map/console view | Functional integration evidence only; it is not a ground-truth accuracy or success-rate benchmark |
-
-Start with the [driver and launch tree](src/), then read the [runbook](docs/runbook.md), [evidence register](docs/evaluation.md), and [benchmark CSV template](docs/benchmark_template.csv). The quantitative thesis results reported elsewhere in my application are not BPX results.
-
-## Video evidence
-
-### BPX hardware-integration clip — 21 seconds
-
-[![Watch the BPX hardware-integration clip](assets/demo/bpx_hardware_navigation_cover.jpg)](assets/demo/bpx_hardware_navigation_demo.mp4)
-
-**[Watch/download the BPX hardware-integration clip](assets/demo/bpx_hardware_navigation_demo.mp4)**. It shows the BPX quadruped in the obstacle-course environment alongside the live map and robot-console view. It is evidence of hardware integration and functional navigation workflow, **not** a quantitative localisation-accuracy, route-success-rate, or learned-policy-deployment claim.
-
-## System scope
+## System Architecture
 
 ```mermaid
 flowchart LR
-    SDK[BPX SDK] --> DRIVER[bpx_driver]
-    DRIVER -->|leg/body odometry| ODOM[/odom/]
-    DRIVER --> IMU[/imu/data/]
-    LIDAR[SLAMTEC LiDAR] --> SCAN[/scan/]
-
+    SDK[BPX vendor SDK] --> DRIVER[bpx_driver]
+    DRIVER --> ODOM[BPX odometry]
+    DRIVER --> IMU[/imu/data]
+    LIDAR[SLAMTEC LiDAR] --> SCAN[/scan]
     ODOM --> EKF[robot_localization EKF]
     IMU --> EKF
-    SCAN --> RF2O[RF2O fallback]
-
-    ODOM --> SELECT{odometry source}
+    SCAN --> RF2O[RF2O scan odometry]
+    ODOM --> SELECT{odom_source}
     EKF --> SELECT
     RF2O --> SELECT
     SELECT --> SLAM[SLAM Toolbox / Cartographer]
-    SLAM --> NAV2[Nav2 planning + control]
-    NAV2 --> CMD[/cmd_vel/]
+    SLAM --> NAV2[Nav2]
+    NAV2 --> CMD[/cmd_vel]
     CMD --> DRIVER
 ```
 
-The launch files enforce one owner for `odom -> base_link`, avoiding the duplicate-TF failure mode that commonly appears when a driver, an EKF and scan odometry are enabled together.
+Each odometry mode assigns exactly one owner to `odom -> base_link`. The launch design avoids running driver TF, EKF TF and RF2O TF as competing publishers.
 
-## Engineering contribution
+## Engineering Decisions
 
-- Adapted the BPX SDK into a ROS 2 driver with velocity control, stand/sit/damping services, joint states, IMU, battery/status topics and odometry.
-- Added command timeout and motion-state gating so stale navigation commands or commands sent before stand-up do not continue driving the robot.
-- Normalised IMU quaternion handling, frame naming and startup-yaw behaviour for downstream localisation.
-- Implemented BPX odometry publication with leg-odometry preference and explicit fallbacks when SDK fields are unavailable or frozen.
-- Added a `robot_localization` EKF route that fuses BPX odometry and IMU while assigning TF ownership to a single node.
-- Integrated two mapping/navigation routes: SLAM Toolbox + AMCL + Nav2, and Cartographer mapping/localisation + Nav2.
-- Exposed `odom_source:=bpx|ekf|rf2o` to compare platform odometry, fused odometry and LiDAR scan matching without rewriting launch files.
-- Documented practical failure points: frame ownership, ROS domain consistency, LiDAR extrinsics, robot motion state and map persistence.
+| Decision | Reason | Evidence |
+| --- | --- | --- |
+| Gate velocity on stand state | Rejects navigation commands before the platform is ready | [Driver callbacks](src/bpx_driver/src/bpx_driver_node.cpp) |
+| Stop on stale `/cmd_vel` | Bounds continued motion after an upstream failure | [Driver timeout](src/bpx_driver/src/bpx_driver_node.cpp) |
+| Select one odometry backend | Makes TF ownership explicit and supports controlled comparison | [SLAM bring-up](src/slam_toolbox_nav2/launch/bringup.launch.py) |
+| Keep EKF terminology precise | The repository configures `robot_localization`; it does not contain a custom 15-state ESKF | [Evidence register](docs/evaluation.md) |
+| Separate demo from benchmark | A screen recording cannot establish trajectory error or success rate | [Evaluation protocol](docs/evaluation.md) |
 
-## Repository layout
+## Evidence and Limits
 
-```text
-.
-├── src/
-│   ├── bpx_driver/              # BPX SDK bridge, safety gating, IMU and odometry
-│   ├── bpx_ekf_bringup/         # robot_localization configuration and launch
-│   ├── slam_toolbox_nav2/       # online mapping and AMCL/Nav2 navigation
-│   ├── cartographer_nav2/       # Cartographer mapping/localisation and Nav2
-│   ├── rf2o_laser_odometry/     # third-party scan-matching fallback
-│   └── sllidar_ros2/            # third-party SLAMTEC LiDAR driver
-├── assets/
-│   ├── demo/                    # BPX hardware-integration clip and cover image
-│   └── diagrams/
-├── docs/
-│   ├── project_showcase.md      # extended technical narrative
-│   ├── runbook.md               # build, launch and validation commands
-│   ├── programming_statement.md # programming evidence for admissions review
-│   ├── evaluation.md            # evidence matrix, failures and benchmark plan
-│   ├── security_and_release.md  # privacy, licensing and release checklist
-│   ├── demo_notes.md            # video timeline and evidence boundary
-│   └── source_attribution.md    # collaboration and third-party attribution
-```
+| Claim | Status |
+| --- | --- |
+| BPX ROS 2 interface and safety gates | Supported by source code |
+| Selectable BPX/EKF/RF2O routes | Supported by launch/configuration |
+| SLAM Toolbox, Cartographer and Nav2 integration | Supported by packages, maps and runbook |
+| Real-platform integration session | Supported by labelled video |
+| Localisation RMSE or repeated-route success rate | Not established in this repository |
+| Custom 15-state legged-robot ESKF | Not claimed; absent from this repository |
 
-## Quick start
+The next valid result is a fixed-route comparison of the three odometry modes using rosbag2 plus an independent trajectory reference. Metrics and failure reporting are defined in [`docs/evaluation.md`](docs/evaluation.md).
 
-Tested target environment: Ubuntu 22.04 and ROS 2 Humble. A BPX robot and its vendor SDK are required for hardware execution.
+## Minimal Reproduction
+
+Target environment: Ubuntu 22.04 and ROS 2 Humble. Hardware execution requires the BPX robot and a vendor-compatible SDK.
 
 ```bash
-sudo apt install \
-  ros-humble-navigation2 ros-humble-nav2-bringup \
-  ros-humble-slam-toolbox ros-humble-robot-localization \
-  ros-humble-cartographer-ros
-
+git clone https://github.com/maiyunxi173-afk/bpx-robot-ros2-navigation-portfolio.git
+cd bpx-robot-ros2-navigation-portfolio
 source /opt/ros/humble/setup.bash
 rosdep install --from-paths src --ignore-src -r -y
 colcon build --symlink-install
 source install/setup.bash
 ```
 
-Start the driver and fused odometry:
+Start the fused-odometry path:
 
 ```bash
-ros2 launch bpx_ekf_bringup ekf_localization.launch.py \
-  robot_ip:=10.21.20.1
+ros2 launch bpx_ekf_bringup ekf_localization.launch.py robot_ip:=10.21.20.1
 ```
 
-Start SLAM Toolbox mapping:
+Start SLAM Toolbox with the EKF route:
 
 ```bash
-ros2 launch slam_toolbox_nav2 bringup.launch.py \
-  mode:=slam odom_source:=ekf
+ros2 launch slam_toolbox_nav2 bringup.launch.py mode:=slam odom_source:=ekf
 ```
 
-Navigate on a saved map:
+Hardware operation, map saving, Cartographer and TF checks are documented in the [runbook](docs/runbook.md). Run the dependency-free portfolio validation, then the Pillow-based media check:
 
 ```bash
-ros2 launch slam_toolbox_nav2 bringup.launch.py \
-  mode:=nav \
-  map:=src/slam_toolbox_nav2/maps/my_map.yaml \
-  odom_source:=ekf
+python3 scripts/validate_portfolio.py
+python3 -m pip install pillow
+python3 scripts/check_media.py
 ```
 
-For Cartographer, RF2O fallback, frame checks and map saving, follow the [runbook](docs/runbook.md).
+## Scope and Attribution
 
-Create a clean, tested source archive for an application portal without `.git`, build artefacts or logs:
+This portfolio was extracted from the collaborative [Hrs_Web_Console](https://github.com/Master-Wei1201/Hrs_Web_Console) navigation workspace at source commit `ac603b8`. The web console, Android client and collaborators' work are not presented as my individual contribution.
 
-```bash
-bash scripts/package_source.sh /path/to/output
-```
+Vendored `sllidar_ros2` and `rf2o_laser_odometry` remain third-party work, and BPX SDK headers/binaries remain subject to vendor terms. See [the complete attribution](docs/source_attribution.md) before reuse or redistribution.
 
-The script also writes a SHA-256 checksum beside the ZIP archive.
+## Review Paths
 
-## Design decisions
-
-| Decision | Rationale |
-| --- | --- |
-| One TF publisher per odometry mode | Prevents competing `odom -> base_link` transforms and unstable localisation. |
-| Selectable odometry backend | Keeps navigation testable when quadruped leg/body odometry degrades or is unavailable. |
-| Velocity-command timeout | Stops motion if the upstream controller stops publishing. |
-| Stand-state gate | Rejects navigation velocity until the BPX platform reports its standing state. |
-
-## Evidence status and limitations
-
-- Saved maps and launch/configuration artefacts are included; raw ROS bags and quantitative navigation benchmarks are not yet included.
-- The EKF in this repository is configured through the standard `robot_localization` package. A separate custom 15-state error-state estimator mentioned in my broader application materials is **not represented by code here** and is therefore not claimed as part of this repository.
-- BPX vendor SDK headers and binaries are retained under `src/bpx_driver/third_party/bpx_sdk`; redistribution and hardware compatibility should be checked against the vendor terms before reuse.
-- The 21-second BPX clip is functional hardware-integration evidence only; it does not establish a numerical localisation or navigation benchmark.
-
-## Collaboration and attribution
-
-The navigation workspace was extracted and reorganised from the collaborative [Hrs_Web_Console](https://github.com/Master-Wei1201/Hrs_Web_Console) repository at source commit `ac603b8`. My portfolio scope is the BPX ROS 2 navigation subsystem described above; the web console and other collaborators' work remain attributed to the source project. Third-party packages are identified in [source attribution](docs/source_attribution.md).
-
-## Documentation
-
-- [Technical project showcase](docs/project_showcase.md)
-- [Programming statement](docs/programming_statement.md)
-- [Evidence, failure cases and evaluation protocol](docs/evaluation.md)
 - [Build and experiment runbook](docs/runbook.md)
-- [Demo notes and timecodes](docs/demo_notes.md)
-- [Public-release and privacy review](docs/security_and_release.md)
-- [Source and third-party attribution](docs/source_attribution.md)
+- [Evidence, failures and benchmark protocol](docs/evaluation.md)
+- [Programming statement](docs/programming_statement.md)
+- [Source and license attribution](docs/source_attribution.md)
+- [Public-release checklist](docs/security_and_release.md)
+- [Demo timecodes and evidence boundary](docs/demo_notes.md)
 
-## Contact
-
-**Mai Yunxi** · [maiyunxi173@gmail.com](mailto:maiyunxi173@gmail.com) · [GitHub profile](https://github.com/maiyunxi173-afk)
+**Contact:** [MAI Yunxi](https://github.com/maiyunxi173-afk)

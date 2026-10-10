@@ -1,6 +1,6 @@
 # BPX Hardware Demo Notes
 
-The BPX hardware clip is available at [assets/demo/bpx_hardware_navigation_demo.mp4](../assets/demo/bpx_hardware_navigation_demo.mp4). It is a 21-second H.264 video derived from the supplied BPX recording for browser-compatible playback on GitHub.
+The BPX hardware clip is available at [docs/media/bpx_physical_demo.mp4](media/bpx_physical_demo.mp4), with a lightweight [GIF preview](media/bpx_physical_preview.gif). It is a 21-second H.264 recording prepared for browser-compatible playback on GitHub.
 
 What the clip shows:
 
